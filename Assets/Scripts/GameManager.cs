@@ -13,6 +13,7 @@ public enum GameState
     DealState,
     PlayState,
     CountState,
+    EndState,
 }
 
 public class GameManager
@@ -80,9 +81,12 @@ public class GameManager
                 PlayCard();
                 break;
             case GameState.CountState:
+                CalculateRank();
                 break;
         }
     }
+
+
 
 
 
@@ -166,6 +170,13 @@ public class GameManager
     {
         if (!isCurPlayerTurnOver) return;
 
+        //所有玩家都没有手牌则切换到结算状态
+        if (players.Count == 0)
+        {
+            ChangeState(GameState.CountState);
+            return;
+        }
+
         //显示公共牌区
         ShowPublicDeck();
 
@@ -180,17 +191,6 @@ public class GameManager
         curPlayer.ShowConsumeDeck();
 
         isCurPlayerTurnOver = false;
-
-        //TODO:当前玩家没有手牌则其离开游戏并记录名次
-        if(curPlayer.handDeck.Count == 0)
-        {
-            rank.Add(curPlayer);
-        }
-        //所有玩家都没有手牌则切换到结算状态
-        if(rank.Count == players.Count)
-        {
-            ChangeState(GameState.CountState);
-        }
     }
 
     /// <summary>
@@ -300,7 +300,7 @@ public class GameManager
                         }
                     }
                     //如果没找到非跳牌的牌则可直接出牌
-                    if(!isFindNoneJumpCard)
+                    if (!isFindNoneJumpCard)
                     {
                         isSelectSuccess = true;
                     }
@@ -346,8 +346,8 @@ public class GameManager
                     Debug.Log($"[选牌] 玩家:{curPlayer.id} 打出牌: {card.type} 公共牌:{curpublicCard.type} \n");
                 }
                 //非跳牌则更新公共牌的单次打出牌数
-                if(!CheckCardTypeEqual(playCard.type, CardType.Card_Jump))
-                { 
+                if (!CheckCardTypeEqual(playCard.type, CardType.Card_Jump))
+                {
                     lastPublicCardCount = curPlayCards.Count;
                 }
             }
@@ -360,8 +360,45 @@ public class GameManager
         //如果出牌成功切换下一名玩家为当前出牌玩家
         if (isSelectSuccess)
         {
+            //检测此玩家是否应该退出比赛
+            CheckPlayerShouldQuit(curPlayer);
+
             ChangeTurnToNextPlayer();
         }
+    }
+
+    /// <summary>
+    /// 检测此玩家是否应该退出比赛
+    /// </summary>
+    /// <param name="player"></param>
+    private void CheckPlayerShouldQuit(Player player)
+    {
+        //如果是最后一名玩家则吃掉公共区牌和自己的手牌
+        if (players.Count == 1)
+        {
+            //吃手牌
+            foreach (var handCard in player.handDeck)
+            {
+                player.consumeDeck.Add(handCard);
+            }
+            //吃公共区牌
+            foreach (var card in publicDeck)
+            {
+                player.consumeDeck.Add(card);
+            }
+            player.handDeck.Clear();
+            publicDeck.Clear();
+        }
+
+        //TODO:当前玩家没有手牌则让其离开游戏并记录名次
+        if (player.handDeck.Count == 0)
+        {
+            rank.Add(player);
+            players.RemoveAt(players.IndexOf(player));
+
+            Debug.Log($"[玩家退出] 玩家:{player.id} 没有手牌了 退出比赛! \n");
+        }
+        
     }
 
     /// <summary>
@@ -369,9 +406,9 @@ public class GameManager
     /// </summary>
     private void ChangeTurnToNextPlayer()
     {
-        var playerId = curPlayerId;
-        while (players.Count > 0)
+        if (players.Count > 0)
         {
+            var playerId = curPlayerId;
             if (playerId + 1 <= players.Count)
             {
                 playerId++;
@@ -381,21 +418,12 @@ public class GameManager
                 playerId = 1;
             }
             var player = players[playerId - 1];
-            //如果轮换到自身则说明没有玩家了
-            if(player == curPlayer)
-            {
-                isCurPlayerTurnOver = true;
-                break;
-            }
-            //只会轮换到游戏中的玩家
-            else if(player.isPlaying)
-            {
-                curPlayer = player;
-                curPlayerId = playerId;
-                isCurPlayerTurnOver = true;
-                break;
-            }
+
+            curPlayer = player;
+            curPlayerId = playerId;
         }
+        
+        isCurPlayerTurnOver = true;
     }
 
     /// <summary>
@@ -429,8 +457,38 @@ public class GameManager
             var player = players[i];
             PlayerDrawCard(player);
         }
+        Debug.Log($"[吃牌] 玩家:{curPlayer.id} 吃牌成功，请任意出牌！\n");
+    }
 
-        ChangeTurnToNextPlayer();
+    /// <summary>
+    /// 计算排名
+    /// </summary>
+    private void CalculateRank()
+    {
+        //根据吃牌数排名[冒泡排序]
+        for (int i = 0; i < rank.Count; i++)
+        {
+            var player1 = rank[i];
+            for (int j = i; j < rank.Count; j++)
+            {
+                var player2 = rank[j];
+
+                if(player1.consumeDeck.Count > player2.consumeDeck.Count)
+                {
+                    var tempPlayer = player1;
+                    player1 = player2;
+                    player2 = player1;
+                }
+                
+            }
+        }
+
+        for (int i = 0; i < rank.Count; i++)
+        {
+            var player = rank[i];
+            Debug.Log($"[排名] 玩家:{player.id} 排名:{i + 1} 吃牌:{player.consumeDeck.Count}");
+        }
+        ChangeState(GameState.EndState);
     }
 
     /// <summary>

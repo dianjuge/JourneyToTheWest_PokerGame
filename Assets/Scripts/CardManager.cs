@@ -105,7 +105,7 @@ public class CardManager
         //打印加入卡池的牌
         foreach (var card in Deck)
         {
-            Debug.Log($"[初始化卡池] {card.color} {card.type} \n");
+            LogManager.PrintLog($"[初始化卡池] {card.color} {card.type} \n");
         }
     }
 
@@ -127,7 +127,7 @@ public class CardManager
         //打印加入卡池的牌
         foreach (var card in newDeck)
         {
-            Debug.Log($"[洗牌]: {card.color} {card.type} \n");
+            LogManager.PrintLog($"[洗牌]: {card.color} {card.type} \n");
         }
         return newDeck;
     }

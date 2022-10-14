@@ -37,15 +37,15 @@ public class Player
     {
         if (handDeck.Count == 0)
         {
-            Debug.Log($"[显示手牌] 玩家:{id} 没有手牌! \n");
+            LogManager.PrintLog($"[显示手牌] 玩家:{id} 没有手牌! \n");
             return;
         }
 
-        Debug.Log($"[显示手牌] 玩家:{id} 手牌数:{handDeck.Count} \n");
+        LogManager.PrintLog($"[显示手牌] 玩家:{id} 手牌数:{handDeck.Count} \n");
         for (int i = 0; i < handDeck.Count; i++)
         {
             var card = handDeck[i];
-            Debug.Log($"[显示手牌] 玩家:{id} 第:{i+1}张牌: {card.color} {card.type} \n");
+            LogManager.PrintLog($"[显示手牌] 玩家:{id} 第:{i+1}张牌: {card.color} {card.type} \n");
         }
     }
 
@@ -56,15 +56,15 @@ public class Player
     {
         if(consumeDeck.Count == 0)
         {
-            Debug.Log($"[显示吃牌] 玩家:{id} 没有吃牌! \n");
+            LogManager.PrintLog($"[显示吃牌] 玩家:{id} 没有吃牌! \n");
             return;
         }
 
-        Debug.Log($"[显示吃牌] 玩家:{id} 吃牌数:{consumeDeck.Count} \n");
+        LogManager.PrintLog($"[显示吃牌] 玩家:{id} 吃牌数:{consumeDeck.Count} \n");
         for (int i = 0; i < consumeDeck.Count; i++)
         {
             var card = consumeDeck[i];
-            Debug.Log($"[显示吃牌] 玩家:{id} 第:{i+1}张牌: {card.color} {card.type} \n");
+            LogManager.PrintLog($"[显示吃牌] 玩家:{id} 第:{i+1}张牌: {card.color} {card.type} \n");
         }
     }
 

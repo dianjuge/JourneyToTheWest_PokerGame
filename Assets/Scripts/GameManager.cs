@@ -104,7 +104,7 @@ public class GameManager
         foreach (var player in players)
         {
             player.isPlaying = true;
-            Debug.Log($"player{player.id} enter \n");
+            LogManager.PrintLog($"[入场] 玩家:{player.id} 加入牌局\n");
         }
 
         curPlayer = players[0];
@@ -136,7 +136,7 @@ public class GameManager
         //打印卡池中所剩的牌
         foreach (var card in Singleton<CardManager>.Inst.Deck)
         {
-            Debug.Log($"Cards remain in deck: {card.color} {card.type} \n");
+            LogManager.PrintLog($"[余牌] 牌库剩余卡牌: {card.color} {card.type} \n");
         }
 
         ChangeState(GameState.PlayState);
@@ -150,7 +150,7 @@ public class GameManager
     {
         if (Singleton<CardManager>.Inst.Deck.Count == 0)
         {
-            Debug.Log($"[抽牌] 牌库为空! 玩家: {player.id} \n");
+            LogManager.PrintLog($"[抽牌] 牌库为空! 玩家: {player.id} \n");
             return;
         }
 
@@ -160,7 +160,7 @@ public class GameManager
         player.AddCardToHandDeck(card);
         //从卡池移除
         Singleton<CardManager>.Inst.Deck.RemoveAt(0);
-        Debug.Log($"[抽牌] 玩家: {player.id} 获得牌: {card.color} {card.type} \n");
+        LogManager.PrintLog($"[抽牌] 玩家: {player.id} 获得牌: {card.color} {card.type} \n");
     }
 
     /// <summary>
@@ -183,7 +183,7 @@ public class GameManager
         //玩家抽牌
         PlayerDrawCard(curPlayer);
 
-        Debug.Log($"[新回合] 当前到玩家:{curPlayer.id} 出牌! \n");
+        LogManager.PrintLog($"[新回合] 当前到玩家:{curPlayer.id} 出牌! \n");
 
         //显示玩家手牌
         curPlayer.ShowHandDeck();
@@ -204,7 +204,7 @@ public class GameManager
         var cardsString = playCardInputField.GetComponent<TMP_InputField>().text;
         if (cardsString == null)
         {
-            Debug.Log($"[选牌] 玩家:{curPlayer.id} 请选择正确的玩家手牌! \n");
+            LogManager.PrintLog($"[选牌] 玩家:{curPlayer.id} 请选择正确的玩家手牌! \n");
             return;
         }
 
@@ -220,7 +220,7 @@ public class GameManager
 
             if (index < 0 || index >= curPlayer.handDeck.Count)
             {
-                Debug.Log($"[选牌] 玩家:{curPlayer.id} 请选择正确的玩家手牌! \n");
+                LogManager.PrintLog($"[选牌] 玩家:{curPlayer.id} 请选择正确的玩家手牌! \n");
                 return;
             }
         }
@@ -234,7 +234,7 @@ public class GameManager
             var curPlayCard = curPlayer.handDeck[idx];
             if (curPlayCard.type != firstSelectCard.type)
             {
-                Debug.Log($"[选牌] 玩家:{curPlayer.id} 选择的牌必须是相同大小! 首张牌:{firstSelectCard.type} 不同牌:{curPlayCard.type}\n");
+                LogManager.PrintLog($"[选牌] 玩家:{curPlayer.id} 选择的牌必须是相同大小! 首张牌:{firstSelectCard.type} 不同牌:{curPlayCard.type}\n");
                 return;
             }
             curPlayCards.Add(curPlayCard);
@@ -249,7 +249,7 @@ public class GameManager
             {
                 publicDeck.Add(card);
                 curPlayer.handDeck.RemoveAt(curPlayer.handDeck.IndexOf(card));
-                Debug.Log($"[选牌] 玩家:{curPlayer.id} 公共牌区为空! 当前打出牌: {card.type} \n");
+                LogManager.PrintLog($"[选牌] 玩家:{curPlayer.id} 公共牌区为空! 当前打出牌: {card.type} \n");
             }
             lastPublicCardCount = curPlayCards.Count;
             isSelectSuccess = true;
@@ -264,7 +264,7 @@ public class GameManager
             if (!CheckCardTypeEqual(playCard.type, CardType.Card_Joker)
                 && lastPublicCardCount != curPlayCards.Count)
             {
-                Debug.Log($"[选牌] 玩家:{curPlayer.id} 打出牌数必须与公共牌数相同! 选牌:{curPlayCards[0].type} 公共牌:{curpublicCard.type} 选牌数:{curPlayCards.Count} 公共牌数:{lastPublicCardCount}\n");
+                LogManager.PrintLog($"[选牌] 玩家:{curPlayer.id} 打出牌数必须与公共牌数相同! 选牌:{curPlayCards[0].type} 公共牌:{curpublicCard.type} 选牌数:{curPlayCards.Count} 公共牌数:{lastPublicCardCount}\n");
                 return;
             }
 
@@ -289,7 +289,7 @@ public class GameManager
                         {
                             publicpPreJumpCard = card;
 
-                            Debug.Log($"[公共牌] 玩家:{curPlayer.id} 找到非跳牌的公共牌! 非跳牌的公共牌:{card.type} 原公共牌:{curpublicCard.type} \n");
+                            LogManager.PrintLog($"[公共牌] 玩家:{curPlayer.id} 找到非跳牌的公共牌! 非跳牌的公共牌:{card.type} 原公共牌:{curpublicCard.type} \n");
                             //替代当前公共牌
                             curpublicCard = card;
                             curpublicCardType = card.type;
@@ -343,7 +343,7 @@ public class GameManager
                 {
                     publicDeck.Add(card);
                     curPlayer.handDeck.RemoveAt(curPlayer.handDeck.IndexOf(card));
-                    Debug.Log($"[选牌] 玩家:{curPlayer.id} 打出牌: {card.type} 公共牌:{curpublicCard.type} \n");
+                    LogManager.PrintLog($"[选牌] 玩家:{curPlayer.id} 打出牌: {card.type} 公共牌:{curpublicCard.type} \n");
                 }
                 //非跳牌则更新公共牌的单次打出牌数
                 if (!CheckCardTypeEqual(playCard.type, CardType.Card_Jump))
@@ -353,7 +353,7 @@ public class GameManager
             }
             else
             {
-                Debug.Log($"[选牌] 玩家:{curPlayer.id} 选的牌压不过! 当前牌:{playCard.type} 公共牌:{curpublicCard.type} \n");
+                LogManager.PrintLog($"[选牌] 玩家:{curPlayer.id} 选的牌压不过! 当前牌:{playCard.type} 公共牌:{curpublicCard.type} \n");
             }
         }
 
@@ -396,7 +396,7 @@ public class GameManager
             rank.Add(player);
             players.RemoveAt(players.IndexOf(player));
 
-            Debug.Log($"[玩家退出] 玩家:{player.id} 没有手牌了 退出比赛! \n");
+            LogManager.PrintLog($"[玩家退出] 玩家:{player.id} 没有手牌了 退出比赛! \n");
         }
         
     }
@@ -433,7 +433,7 @@ public class GameManager
     {
         if (publicDeck.Count == 0)
         {
-            Debug.Log($"[吃牌] 玩家:{curPlayer.id} 公共牌区为空! \n");
+            LogManager.PrintLog($"[吃牌] 玩家:{curPlayer.id} 公共牌区为空! \n");
             return;
         }
 
@@ -442,7 +442,7 @@ public class GameManager
         {
             var card = publicDeck[i];
             curPlayer.AddCardToConsumeDeck(card);
-            Debug.Log($"[吃牌] 玩家:{curPlayer.id} 吃牌:{card.color} {card.type} \n");
+            LogManager.PrintLog($"[吃牌] 玩家:{curPlayer.id} 吃牌:{card.color} {card.type} \n");
         }
         publicDeck.Clear();
 
@@ -457,7 +457,7 @@ public class GameManager
             var player = players[i];
             PlayerDrawCard(player);
         }
-        Debug.Log($"[吃牌] 玩家:{curPlayer.id} 吃牌成功，请任意出牌！\n");
+        LogManager.PrintLog($"[吃牌] 玩家:{curPlayer.id} 吃牌成功，请任意出牌！\n");
     }
 
     /// <summary>
@@ -486,7 +486,7 @@ public class GameManager
         for (int i = 0; i < rank.Count; i++)
         {
             var player = rank[i];
-            Debug.Log($"[排名] 玩家:{player.id} 排名:{i + 1} 吃牌:{player.consumeDeck.Count}");
+            LogManager.PrintLog($"[排名] 玩家:{player.id} 排名:{i + 1} 吃牌:{player.consumeDeck.Count}");
         }
         ChangeState(GameState.EndState);
     }
@@ -497,7 +497,7 @@ public class GameManager
     /// <param name="state"></param>
     private void ChangeState(GameState state)
     {
-        Debug.Log($"[游戏状态切换] from {gameState} to {state} \n");
+        LogManager.PrintLog($"[游戏状态切换] from {gameState} to {state} \n");
         gameState = state;
     }
 
@@ -549,12 +549,12 @@ public class GameManager
     {
         if (publicDeck.Count == 0)
         {
-            Debug.Log($"[选牌] 玩家:{curPlayer.id} 公共牌区为空! \n");
+            LogManager.PrintLog($"[选牌] 玩家:{curPlayer.id} 公共牌区为空! \n");
             return;
         }
         foreach (var card in publicDeck)
         {
-            Debug.Log($"[公共牌] 玩家:{curPlayer.id} 公共牌: {card.color} {card.type} \n");
+            LogManager.PrintLog($"[公共牌] 玩家:{curPlayer.id} 公共牌: {card.color} {card.type} \n");
         }
     }
 }
